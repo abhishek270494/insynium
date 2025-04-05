@@ -10,29 +10,29 @@ import plm.model.Document;
 @Repository
 @Transactional
 public class DocumentDao {
-	
-	@Autowired
-	private SessionFactory sessionFactory;
-	
-	public Document get(String reference, String version, int iteration) {
-    	//
-		// Implementation and returned value are not relevant for this exercise
-    	//
-		return null;
-	}
 
-	public void update(Document document) {
-		
-		Session currentSession = sessionFactory.getCurrentSession();
-		currentSession.update(document);
-		currentSession.flush();
-	}
+    @Autowired
+    private SessionFactory sessionFactory;
 
-	public void create(Document document) {
-		
-		Session currentSession = sessionFactory.getCurrentSession();
-		currentSession.save(document);
-		currentSession.flush();
-	}
-	
+    public Document get(String reference, String version, int iteration) {
+        //
+        // Implementation and returned value are not relevant for this exercise
+        //
+        return null;
+    }
+
+    public void update(Document document) {
+
+        Session currentSession = sessionFactory.getCurrentSession();
+        currentSession.update(document);
+        currentSession.flush();
+    }
+
+    public void create(Document document) {
+
+        Session currentSession = sessionFactory.getCurrentSession();
+        currentSession.save(document);
+        currentSession.flush();
+    }
+
 }

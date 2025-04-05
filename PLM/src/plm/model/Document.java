@@ -2,11 +2,6 @@ package plm.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.IdClass;
-import javax.persistence.ManyToOne;
-import java.io.Serializable;
-import java.util.Objects;
 
 @Entity
 public class Document extends AbstractEntity {

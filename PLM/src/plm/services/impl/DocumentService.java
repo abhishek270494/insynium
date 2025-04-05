@@ -1,4 +1,4 @@
-package plm.services;
+package plm.services.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,14 +7,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import plm.dao.DocumentDao;
 import plm.model.Document;
+import plm.services.IDocumentService;
 
 @Service
-public class DocumentService extends AbstractOperation {
+public class DocumentService implements IDocumentService {
 
     @Autowired
     private DocumentDao documentDao;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PartService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DocumentService.class);
 
     @Transactional
     public void reserve(String userId, String reference, String version, int iteration) {

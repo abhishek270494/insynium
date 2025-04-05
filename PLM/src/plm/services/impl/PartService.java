@@ -1,4 +1,4 @@
-package plm.services;
+package plm.services.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,11 +9,13 @@ import plm.dao.DocumentDao;
 import plm.dao.PartDao;
 import plm.model.Document;
 import plm.model.Part;
+import plm.services.IPartService;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Service
-public class PartService extends AbstractOperation {
+public class PartService implements IPartService {
 
     @Autowired
     private PartDao partDao;
@@ -21,7 +23,7 @@ public class PartService extends AbstractOperation {
     @Autowired
     private DocumentDao documentDao;
 
-    private static Logger LOGGER = LoggerFactory.getLogger(PartService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PartService.class);
 
     @Transactional
     public void reserve(String userId, String reference, String version, int iteration) {
@@ -167,6 +169,6 @@ public class PartService extends AbstractOperation {
         //
         // Implementation and returned value are not relevant for this exercise
         //
-        return null;
+        return new HashSet<>();
     }
 }
