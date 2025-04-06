@@ -1,8 +1,9 @@
 package java.dao;
 
-import java.model.Document;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.model.Document;
 
 @Repository
 @Transactional

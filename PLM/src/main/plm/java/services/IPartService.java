@@ -2,7 +2,6 @@ package java.services;
 
 import java.model.Document;
 import java.model.Part;
-
 import java.util.Set;
 
 /**
