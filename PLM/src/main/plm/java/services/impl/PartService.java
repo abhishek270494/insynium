@@ -70,6 +70,7 @@ public class PartService extends CommonOperations implements IPartService {
             part.setDocuments(getLinkedDocuments(part).stream().map(document -> {
                 document.setReserved(false);
                 document.setReservedBy(null);
+                document.setPart(part);
                 return document;
             }).collect(Collectors.toSet()));
             partDao.update(part);
@@ -85,6 +86,7 @@ public class PartService extends CommonOperations implements IPartService {
             part.setLifeCycleState(state);
             part.setDocuments(getLinkedDocuments(part).stream().map(document -> {
                 document.setLifeCycleState(state);
+                document.setPart(part);
                 return document;
             }).collect(Collectors.toSet()));
             partDao.update(part);
@@ -105,8 +107,12 @@ public class PartService extends CommonOperations implements IPartService {
             nextPartVersion.setVersionSchema(part.getVersionSchema());
             nextPartVersion.setPartAttribute1(part.getPartAttribute1());
             nextPartVersion.setPartAttribute2(part.getPartAttribute2());
-            part.setDocuments(getLinkedDocuments(part).stream()
-                    .map(document -> mapRevisedDocument(version, document))
+            nextPartVersion.setDocuments(getLinkedDocuments(part).stream()
+                    .map(document -> {
+                        mapRevisedDocument(version, document);
+                        document.setPart(nextPartVersion);
+                        return document;
+                    })
                     .collect(Collectors.toSet()));
             partDao.create(nextPartVersion);
         } else {

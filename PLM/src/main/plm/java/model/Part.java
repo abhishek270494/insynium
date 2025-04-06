@@ -53,14 +53,4 @@ public class Part extends BaseEntity {
     public void setDocuments(Set<Document> documents) {
         this.documents = documents;
     }
-
-    public void addDocument(Document document) {
-        documents.add(document);
-        document.setPart(this);
-    }
-
-    public void removeDocument(Document document) {
-        documents.remove(document);
-        document.setPart(null);
-    }
 }
