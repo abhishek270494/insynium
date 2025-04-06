@@ -5,9 +5,9 @@ import java.model.Document;
 
 /**
  * Interface for specific document service operations.
- * Extends the CommonOperation interface to inherit java.common operations.
  */
-public interface IDocumentService extends EntityService {
+public interface IDocumentService extends IReservationService, IUpdateService,
+        IReviseService, IStateService, IFreeService {
 
     boolean isNotLinkedToPart(Document document);
 

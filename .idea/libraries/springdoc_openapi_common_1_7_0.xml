@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="springdoc-openapi-common-1.7.0">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/PLM/lib/springdoc-openapi-common-1.7.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

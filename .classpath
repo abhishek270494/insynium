@@ -15,5 +15,7 @@
 	<classpathentry kind="lib" path="PLM/lib/spring-tx-5.1.7.RELEASE.jar"/>
 	<classpathentry kind="lib" path="PLM/lib/spring-web-5.1.7.RELEASE.jar"/>
 	<classpathentry kind="lib" path="PLM/lib/spring-webmvc-5.1.7.RELEASE.jar"/>
+	<classpathentry kind="lib" path="PLM/lib/swagger-core-2.2.21.jar"/>
+	<classpathentry kind="lib" path="PLM/lib/swagger-annotations-2.2.21.jar"/>
 	<classpathentry kind="output" path="PLM/bin"/>
 </classpath>

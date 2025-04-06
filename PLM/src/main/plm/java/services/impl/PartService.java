@@ -32,6 +32,8 @@ public class PartService extends CommonOperations implements IPartService {
     @Override
     public void reserve(String userId, String reference, String version, int iteration) {
         Part part = partDao.get(reference, version, iteration);
+
+
         if (!part.isReserved() && !part.getLifeCycleTemplate().isFinal(part.getLifeCycleState())) {
             Part nextPartIteration = getPart(userId, iteration, part);
             part.setDocuments(getLinkedDocuments(part).stream()
@@ -48,11 +50,11 @@ public class PartService extends CommonOperations implements IPartService {
     }
 
     @Override
-    public void update(String userId, String reference, String version, int iteration, String partAttribute1, String partAttribute2) {
+    public void update(String userId, String reference, String version, int iteration, String attribute1, String attribute2) {
         Part part = partDao.get(reference, version, iteration);
         if (part.isReserved() && part.getReservedBy().equals(userId)) {
-            part.setPartAttribute1(partAttribute1);
-            part.setPartAttribute2(partAttribute2);
+            part.setPartAttribute1(attribute1);
+            part.setPartAttribute2(attribute2);
             partDao.update(part);
         } else {
             logAndThrow("part.not.reserved", reference, version, iteration);

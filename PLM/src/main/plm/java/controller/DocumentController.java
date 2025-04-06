@@ -1,20 +1,19 @@
 package java.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
 import java.services.impl.DocumentService;
 
 /**
- * REST java.controller for managing documents.
+ * REST controller for managing documents.
  */
 @RestController
-public class DocumentController {
+@Tag(name = "Document Controller", description = "APIs for managing Document lifecycle")
+public class DocumentController extends AbstractController {
 
     @Autowired
     private DocumentService documentService;
@@ -28,11 +27,12 @@ public class DocumentController {
      * @param iteration the iteration of the document
      * @return a ResponseEntity indicating the result of the operation
      */
-    @GetMapping("/Document/reserve")
-    public ResponseEntity<Void> reserve(@RequestHeader("userId") String userId,
-                                        @RequestParam("reference") String reference,
-                                        @RequestParam("version") String version,
-                                        @RequestParam("iteration") int iteration) {
+    @Override
+    @Operation(summary = "Reserve a Document")
+    public ResponseEntity<Void> reserve(String userId,
+                                        String reference,
+                                        String version,
+                                        int iteration) {
         documentService.reserve(userId, reference, version, iteration);
         return ResponseEntity.ok().build();
     }
@@ -48,13 +48,14 @@ public class DocumentController {
      * @param documentAttribute2 the second attribute of the document
      * @return a ResponseEntity indicating the result of the operation
      */
-    @PutMapping("/Document/update")
-    public ResponseEntity<Void> update(@RequestHeader("userId") String userId,
-                                       @RequestParam("reference") String reference,
-                                       @RequestParam("version") String version,
-                                       @RequestParam("iteration") int iteration,
-                                       @RequestParam("documentAttribute1") String documentAttribute1,
-                                       @RequestParam("documentAttribute2") String documentAttribute2) {
+    @Override
+    @Operation(summary = "Update a Document")
+    public ResponseEntity<Void> update(String userId,
+                                       String reference,
+                                       String version,
+                                       int iteration,
+                                       String documentAttribute1,
+                                       String documentAttribute2) {
         documentService.update(userId, reference, version, iteration, documentAttribute1, documentAttribute2);
         return ResponseEntity.ok().build();
     }
@@ -68,11 +69,12 @@ public class DocumentController {
      * @param iteration the iteration of the document
      * @return a ResponseEntity indicating the result of the operation
      */
-    @PutMapping("/Document/free")
-    public ResponseEntity<Void> free(@RequestHeader("userId") String userId,
-                                     @RequestParam("reference") String reference,
-                                     @RequestParam("version") String version,
-                                     @RequestParam("iteration") int iteration) {
+    @Override
+    @Operation(summary = "Free a Document")
+    public ResponseEntity<Void> free(String userId,
+                                     String reference,
+                                     String version,
+                                     int iteration) {
         documentService.free(userId, reference, version, iteration);
         return ResponseEntity.ok().build();
     }
@@ -87,12 +89,13 @@ public class DocumentController {
      * @param state     the new state of the document
      * @return a ResponseEntity indicating the result of the operation
      */
-    @PutMapping("/Document/setState")
-    public ResponseEntity<Void> setState(@RequestHeader("userId") String userId,
-                                         @RequestParam("reference") String reference,
-                                         @RequestParam("version") String version,
-                                         @RequestParam("iteration") int iteration,
-                                         @RequestParam("state") String state) {
+    @Override
+    @Operation(summary = "Set Document state")
+    public ResponseEntity<Void> setState(String userId,
+                                         String reference,
+                                         String version,
+                                         int iteration,
+                                         String state) {
         documentService.setState(userId, reference, version, iteration, state);
         return ResponseEntity.ok().build();
     }
@@ -106,11 +109,12 @@ public class DocumentController {
      * @param iteration the iteration of the document
      * @return a ResponseEntity indicating the result of the operation
      */
-    @PostMapping("/Document/revise")
-    public ResponseEntity<Void> revise(@RequestHeader("userId") String userId,
-                                       @RequestParam("reference") String reference,
-                                       @RequestParam("version") String version,
-                                       @RequestParam("iteration") int iteration) {
+    @Override
+    @Operation(summary = "Revise a Document")
+    public ResponseEntity<Void> revise(String userId,
+                                       String reference,
+                                       String version,
+                                       int iteration) {
         documentService.revise(userId, reference, version, iteration);
         return ResponseEntity.ok().build();
     }
