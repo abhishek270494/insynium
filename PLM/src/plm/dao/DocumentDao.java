@@ -6,33 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import plm.model.Document;
+import plm.model.Part;
 
 @Repository
 @Transactional
-public class DocumentDao {
-
-    @Autowired
-    private SessionFactory sessionFactory;
-
-    public Document get(String reference, String version, int iteration) {
-        //
-        // Implementation and returned value are not relevant for this exercise
-        //
-        return null;
-    }
-
-    public void update(Document document) {
-
-        Session currentSession = sessionFactory.getCurrentSession();
-        currentSession.update(document);
-        currentSession.flush();
-    }
-
-    public void create(Document document) {
-
-        Session currentSession = sessionFactory.getCurrentSession();
-        currentSession.save(document);
-        currentSession.flush();
-    }
-
+public class DocumentDao extends GenericDao<Document> {
+    // Additional Part-specific methods can be added here
 }

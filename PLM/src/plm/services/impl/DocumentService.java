@@ -10,32 +10,21 @@ import plm.model.Document;
 import plm.services.IDocumentService;
 
 @Service
-public class DocumentService implements IDocumentService {
+@Transactional
+public class DocumentService extends CommonOperations implements IDocumentService {
 
     @Autowired
     private DocumentDao documentDao;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DocumentService.class);
 
-    @Transactional
+    @Override
     public void reserve(String userId, String reference, String version, int iteration) {
-
         Document document = documentDao.get(reference, version, iteration);
-
-        Document nextIteration = new Document(document.getReference(), document.getVersion(), iteration + 1);
-
-        nextIteration.setReserved(true);
-        nextIteration.setReservedBy(userId);
-        nextIteration.setLifeCycleTemplate(document.getLifeCycleTemplate());
-        nextIteration.setLifeCycleState(document.getLifeCycleState());
-        nextIteration.setVersionSchema(document.getVersionSchema());
-        nextIteration.setDocumentAttribute1(document.getDocumentAttribute1());
-        nextIteration.setDocumentAttribute2(document.getDocumentAttribute2());
-        documentDao.create(nextIteration);
-
+        documentDao.create(mapReservedDocument(userId, iteration, document));
     }
 
-    @Transactional
+    @Override
     public void update(String userId, String reference, String version, int iteration, String documentAttribute1, String documentAttribute2) {
         Document document = documentDao.get(reference, version, iteration);
         document.setDocumentAttribute1(documentAttribute1);
@@ -43,11 +32,9 @@ public class DocumentService implements IDocumentService {
         documentDao.update(document);
     }
 
-    @Transactional
+    @Override
     public void free(String userId, String reference, String version, int iteration) {
-
         Document document = documentDao.get(reference, version, iteration);
-
         if (isNotLinkedToPart(document)) {
             document.setReserved(false);
             document.setReservedBy(null);
@@ -55,31 +42,21 @@ public class DocumentService implements IDocumentService {
         }
     }
 
-    @Transactional
+    @Override
     public void setState(String userId, String reference, String version, int iteration, String state) throws RuntimeException {
-
         Document document = documentDao.get(reference, version, iteration);
         document.setLifeCycleState(state);
         documentDao.update(document);
     }
 
-    @Transactional
+    @Override
     public void revise(String userId, String reference, String version, int iteration) throws RuntimeException {
-
         Document document = documentDao.get(reference, version, iteration);
-        Document nextVersion = new Document(document.getReference(), document.getVersionSchema().getNextVersionLabel(version), 1);
-        nextVersion.setReserved(false);
-        nextVersion.setReservedBy(null);
-        nextVersion.setLifeCycleTemplate(document.getLifeCycleTemplate());
-        nextVersion.setLifeCycleState(document.getLifeCycleTemplate().getInitialState());
-        nextVersion.setVersionSchema(document.getVersionSchema());
-        nextVersion.setDocumentAttribute1(document.getDocumentAttribute1());
-        nextVersion.setDocumentAttribute2(document.getDocumentAttribute2());
-        documentDao.create(nextVersion);
+        documentDao.create(mapRevisedDocument(version, document));
     }
 
-
-    protected boolean isNotLinkedToPart(Document document) {
+    @Override
+    public boolean isNotLinkedToPart(Document document) {
         //
         // Implementation and returned value are not relevant for this exercise
         //

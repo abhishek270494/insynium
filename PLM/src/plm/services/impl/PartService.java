@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import plm.dao.DocumentDao;
 import plm.dao.PartDao;
 import plm.model.Document;
 import plm.model.Part;
@@ -13,159 +12,109 @@ import plm.services.IPartService;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
-public class PartService implements IPartService {
+@Transactional
+public class PartService extends CommonOperations implements IPartService {
 
     @Autowired
     private PartDao partDao;
 
-    @Autowired
-    private DocumentDao documentDao;
-
     private static final Logger LOGGER = LoggerFactory.getLogger(PartService.class);
 
-    @Transactional
+    @Override
     public void reserve(String userId, String reference, String version, int iteration) {
-
         Part part = partDao.get(reference, version, iteration);
+
+        if (part == null) {
+            LOGGER.error("Part not found: reference={}, version={}, iteration={}", reference, version, iteration);
+            return;
+        }
 
         if (!part.isReserved() && !part.getLifeCycleTemplate().isFinal(part.getLifeCycleState())) {
-
-            Part nextPartIteration = new Part(part.getReference(), part.getVersion(), iteration + 1);
-
-            nextPartIteration.setReserved(true);
-            nextPartIteration.setReservedBy(userId);
-
-            nextPartIteration.setLifeCycleTemplate(part.getLifeCycleTemplate());
-            nextPartIteration.setLifeCycleState(part.getLifeCycleState());
-
-            nextPartIteration.setVersionSchema(part.getVersionSchema());
-
-            nextPartIteration.setPartAttribute1(part.getPartAttribute1());
-            nextPartIteration.setPartAttribute2(part.getPartAttribute2());
-
+            Part nextPartIteration = getPart(userId, iteration, part);
+            part.setDocuments(getLinkedDocuments(part).stream()
+                    .map(document -> {
+                        Document nextIteration = mapReservedDocument(userId, iteration, document);
+                        nextIteration.setPart(part);
+                        return nextIteration;
+                    })
+                    .collect(Collectors.toSet()));
             partDao.create(nextPartIteration);
-
-            for (Document document : getLinkedDocuments(part)) {
-                Document nextIteration = new Document(document.getReference(), document.getVersion(), iteration + 1);
-
-                nextIteration.setReserved(true);
-                nextIteration.setReservedBy(userId);
-
-                nextIteration.setLifeCycleTemplate(document.getLifeCycleTemplate());
-                nextIteration.setLifeCycleState(document.getLifeCycleState());
-
-                nextIteration.setVersionSchema(document.getVersionSchema());
-
-                nextIteration.setDocumentAttribute1(document.getDocumentAttribute1());
-                nextIteration.setDocumentAttribute2(document.getDocumentAttribute2());
-
-                documentDao.create(nextIteration);
-            }
         }
     }
 
-    @Transactional
+    @Override
     public void update(String userId, String reference, String version, int iteration, String partAttribute1, String partAttribute2) {
-
         Part part = partDao.get(reference, version, iteration);
-
         if (part.isReserved() && part.getReservedBy().equals(userId)) {
-
             part.setPartAttribute1(partAttribute1);
             part.setPartAttribute2(partAttribute2);
-
             partDao.update(part);
         }
     }
 
-    @Transactional
+    @Override
     public void free(String userId, String reference, String version, int iteration) {
-
         Part part = partDao.get(reference, version, iteration);
-
         if (part.isReserved() && part.getReservedBy().equals(userId)) {
-
             part.setReserved(false);
             part.setReservedBy(null);
-
-            partDao.update(part);
-
-            for (Document document : getLinkedDocuments(part)) {
-
+            part.setDocuments(getLinkedDocuments(part).stream().map(document -> {
                 document.setReserved(false);
                 document.setReservedBy(null);
-
-                documentDao.update(document);
-            }
-        }
-    }
-
-    @Transactional
-    public void setState(String userId, String reference, String version, int iteration, String state) {
-
-        Part part = partDao.get(reference, version, iteration);
-
-        if (!part.isReserved() && part.getLifeCycleTemplate().isKnown(state)) {
-
-            part.setLifeCycleState(state);
-
+                return document;
+            }).collect(Collectors.toSet()));
             partDao.update(part);
-
-            for (Document document : getLinkedDocuments(part)) {
-
-                document.setLifeCycleState(state);
-
-                documentDao.update(document);
-            }
         }
     }
 
-    @Transactional
-    public void revise(String userId, String reference, String version, int iteration) {
-
+    @Override
+    public void setState(String userId, String reference, String version, int iteration, String state) {
         Part part = partDao.get(reference, version, iteration);
+        if (!part.isReserved() && part.getLifeCycleTemplate().isKnown(state)) {
+            part.setLifeCycleState(state);
+            part.setDocuments(getLinkedDocuments(part).stream().map(document -> {
+                document.setLifeCycleState(state);
+                return document;
+            }).collect(Collectors.toSet()));
+            partDao.update(part);
+        }
+    }
 
+    @Override
+    public void revise(String userId, String reference, String version, int iteration) {
+        Part part = partDao.get(reference, version, iteration);
         if (!part.isReserved() && part.getLifeCycleTemplate().isFinal(part.getLifeCycleState())) {
-
             Part nextPartVersion = new Part(part.getReference(), part.getVersionSchema().getNextVersionLabel(version), 1);
-
             nextPartVersion.setReserved(false);
             nextPartVersion.setReservedBy(null);
-
             nextPartVersion.setLifeCycleTemplate(part.getLifeCycleTemplate());
             nextPartVersion.setLifeCycleState(part.getLifeCycleTemplate().getInitialState());
-
             nextPartVersion.setVersionSchema(part.getVersionSchema());
-
             nextPartVersion.setPartAttribute1(part.getPartAttribute1());
             nextPartVersion.setPartAttribute2(part.getPartAttribute2());
-
+            part.setDocuments(getLinkedDocuments(part).stream()
+                    .map(document -> mapRevisedDocument(version, document))
+                    .collect(Collectors.toSet()));
             partDao.create(nextPartVersion);
-
-            for (Document document : getLinkedDocuments(part)) {
-
-                Document nextDocumentVersion = new Document(document.getReference(), document.getVersionSchema().getNextVersionLabel(version), 1);
-
-                nextDocumentVersion.setReserved(false);
-                nextDocumentVersion.setReservedBy(null);
-
-                nextDocumentVersion.setLifeCycleTemplate(document.getLifeCycleTemplate());
-                nextDocumentVersion.setLifeCycleState(document.getLifeCycleTemplate().getInitialState());
-
-                nextDocumentVersion.setVersionSchema(document.getVersionSchema());
-
-                nextDocumentVersion.setDocumentAttribute1(document.getDocumentAttribute1());
-                nextDocumentVersion.setDocumentAttribute2(document.getDocumentAttribute2());
-
-                documentDao.create(nextDocumentVersion);
-            }
         }
     }
 
+    private Part getPart(String userId, int iteration, Part part) {
+        Part nextPartIteration = new Part(part.getReference(), part.getVersion(), iteration + 1);
+        nextPartIteration.setReserved(true);
+        nextPartIteration.setReservedBy(userId);
+        nextPartIteration.setLifeCycleTemplate(part.getLifeCycleTemplate());
+        nextPartIteration.setLifeCycleState(part.getLifeCycleState());
+        nextPartIteration.setVersionSchema(part.getVersionSchema());
+        nextPartIteration.setPartAttribute1(part.getPartAttribute1());
+        nextPartIteration.setPartAttribute2(part.getPartAttribute2());
+        return nextPartIteration;
+    }
 
-    private Set<Document> getLinkedDocuments(Part part) {
+    public Set<Document> getLinkedDocuments(Part part) {
         //
         // Implementation and returned value are not relevant for this exercise
         //

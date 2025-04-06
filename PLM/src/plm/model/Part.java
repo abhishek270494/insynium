@@ -1,16 +1,26 @@
 package plm.model;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
-public class Part extends AbstractEntity {
+@Table(name = "part")
+public class Part extends BaseEntity {
 
-    @Column
+    @Column(length = 100)
     private String partAttribute1;
 
-    @Column
+    @Column(length = 100)
     private String partAttribute2;
+
+    @OneToMany(mappedBy = "part", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Set<Document> documents = new HashSet<>();
 
     public Part() {
 
@@ -34,5 +44,23 @@ public class Part extends AbstractEntity {
 
     public void setPartAttribute2(String partAttribute2) {
         this.partAttribute2 = partAttribute2;
+    }
+
+    public Set<Document> getDocuments() {
+        return documents;
+    }
+
+    public void setDocuments(Set<Document> documents) {
+        this.documents = documents;
+    }
+
+    public void addDocument(Document document) {
+        documents.add(document);
+        document.setPart(this);
+    }
+
+    public void removeDocument(Document document) {
+        documents.remove(document);
+        document.setPart(null);
     }
 }

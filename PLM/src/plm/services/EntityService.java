@@ -1,6 +1,6 @@
 package plm.services;
 
-public interface CommonOperation {
+public interface EntityService {
 
     void reserve(String userId, String reference, String version, int iteration);
 

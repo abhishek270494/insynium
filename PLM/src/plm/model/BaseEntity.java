@@ -1,5 +1,7 @@
 package plm.model;
 
+import org.springframework.lang.NonNull;
+
 import javax.persistence.Column;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
@@ -9,22 +11,25 @@ import java.io.Serializable;
 import java.util.Objects;
 
 @MappedSuperclass
-@IdClass(AbstractEntity.AbstractEntityPK.class)
-public class AbstractEntity {
+@IdClass(BaseEntity.BaseEntityPK.class)
+public class BaseEntity {
 
     @Id
+    @NonNull
     private String reference;
 
     @Id
+    @NonNull
     private String version;
 
     @Id
+    @NonNull
     private int iteration;
 
     @Column
     private boolean reserved;
 
-    @Column
+    @Column(length = 100)
     private String reservedBy;
 
     @ManyToOne
@@ -36,10 +41,10 @@ public class AbstractEntity {
     @ManyToOne
     private VersionSchema versionSchema;
 
-    public AbstractEntity() {
+    public BaseEntity() {
     }
 
-    public AbstractEntity(String reference, String version, int iteration) {
+    public BaseEntity(String reference, String version, int iteration) {
         this.reference = reference;
         this.version = version;
         this.iteration = iteration;
@@ -97,15 +102,15 @@ public class AbstractEntity {
         this.versionSchema = versionSchema;
     }
 
-    public static class AbstractEntityPK implements Serializable {
+    public static class BaseEntityPK implements Serializable {
         private String reference;
         private String version;
         private int iteration;
 
-        public AbstractEntityPK() {
+        public BaseEntityPK() {
         }
 
-        public AbstractEntityPK(String reference, String version, int iteration) {
+        public BaseEntityPK(String reference, String version, int iteration) {
             this.reference = reference;
             this.version = version;
             this.iteration = iteration;
@@ -120,7 +125,7 @@ public class AbstractEntity {
         public boolean equals(Object obj) {
             if (this == obj) return true;
             if (obj == null || getClass() != obj.getClass()) return false;
-            AbstractEntityPK other = (AbstractEntityPK) obj;
+            BaseEntityPK other = (BaseEntityPK) obj;
             return iteration == other.iteration && Objects.equals(reference, other.reference) && Objects.equals(version, other.version);
         }
     }
