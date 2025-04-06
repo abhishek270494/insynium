@@ -3,6 +3,7 @@ package java.model;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinColumns;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
@@ -17,7 +18,12 @@ public class Document extends BaseEntity {
     private String documentAttribute2;
 
     @ManyToOne
-    @JoinColumn(name = "part_id")
+    @JoinColumns({
+            @JoinColumn(name = "part_reference", referencedColumnName = "reference"),
+            @JoinColumn(name = "part_version", referencedColumnName = "version"),
+            @JoinColumn(name = "part_iteration", referencedColumnName = "iteration")
+    })
+    // Add columns (part_reference, part_version, part_iteration) in the document table to enable the foreign key
     private Part part;
 
     public Document() {
